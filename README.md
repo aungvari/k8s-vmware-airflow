@@ -1,3 +1,13 @@
+Table of Contents
+=================
+
+   * [Create the kubernetes cluster on VMWare workstation](#create-the-kubernetes-cluster-on-vmware-workstation)
+   * [Deploying MYSQL on the Kubernetes cluster](#deploying-mysql-on-the-kubernetes-cluster)
+   * [Setting up Airflow](#setting-up-airflow)
+   * [Extending the project](#extending-the-project)
+      * [Additional comments](#additional-comments)
+
+
 # Create the kubernetes cluster on VMWare workstation
 
 1. Download the minimal image for VMWare from https://www.linuxvmimages.com/images/centos-7/
