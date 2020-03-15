@@ -1,14 +1,4 @@
-Table of Contents
-=================
-
-      * [Create the kubernetes cluster on VMWare workstation](#create-the-kubernetes-cluster-on-vmware-workstation)
-      * [Deploying MYSQL on the Kubernetes cluster](#deploying-mysql-on-the-kubernetes-cluster)
-      * [Setting up Airflow](#setting-up-airflow)
-      * [Extending the project](#extending-the-project)
-      * [Additional comments](#additional-comments)
-      
-
-## Create the kubernetes cluster on VMWare workstation
+# Create the kubernetes cluster on VMWare workstation
 
 1. Download the minimal image for VMWare from https://www.linuxvmimages.com/images/centos-7/
 2. Import into VMWare with the following settings:
@@ -50,7 +40,7 @@ Table of Contents
   k8s-worker-node-2   Ready    worker   18m   v1.17.4
 ```
 
-## Deploying MYSQL on the Kubernetes cluster
+# Deploying MYSQL on the Kubernetes cluster
 
 Using:
 https://kubernetes.io/docs/tasks/run-application/run-single-instance-stateful-application/
@@ -115,7 +105,7 @@ GRANT ALL PRIVILEGES ON *.* TO 'airflow'@'%' IDENTIFIED BY 'airflow' WITH GRANT 
 flush privileges;
 ```
 
-## Setting up Airflow
+# Setting up Airflow
 
 1. Register on Docker hub and set up a repository: https://hub.docker.com/repository/docker/aungvari/test
 2. Using the guide https://github.com/stwind/airflow-on-kubernetes build the docker image.
@@ -249,7 +239,7 @@ Unfortunately Airflow errors here and no data gets uploaded:
 ![kép](https://user-images.githubusercontent.com/12872375/76699670-1624a900-66b0-11ea-87fc-e2cf0710f99b.png)
 
 
-## Extending the project
+# Extending the project
 
 1. First and foremost there are no security considerations involved at any point in the above: 
     - Using the kubernetes secret store is not recommended as passwords are only base64 encoded
