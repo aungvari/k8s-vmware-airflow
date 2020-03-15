@@ -1,0 +1,13 @@
+apiVersion: v1
+data:
+  my-config.cnf: |
+    [mysqld]
+    explicit_defaults_for_timestamp=1
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2020-03-14T16:54:17Z"
+  name: mysql-cnf
+  namespace: default
+  resourceVersion: "36582"
+  selfLink: /api/v1/namespaces/default/configmaps/mysql-cnf
+  uid: af462f5d-6531-4559-b111-a2d9f77e6e50
