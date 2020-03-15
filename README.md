@@ -1,5 +1,3 @@
-# k8s-vmware-airflow
-
 ## Create the kubernetes cluster on VMWare workstation
 
 1. Download the minimal image for VMWare from https://www.linuxvmimages.com/images/centos-7/
