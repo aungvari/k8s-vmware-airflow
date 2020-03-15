@@ -173,7 +173,7 @@ kubectl run airflow -ti --rm --restart=Never --image=aungvari/test:airflow --ove
   }
 }'
 ```
-Check the status of the pods:
+6. Check the status of the pods:
 
 ```
 [centos@k8s-master ~]$ kubectl describe pod airflow
@@ -198,9 +198,80 @@ Events:
   Normal  Started    21s        kubelet, k8s-worker-node-1  Started container scheduler
 ```
 
-We can now connect to the airflow webserver if forward the port 8080:
+7. We can now connect to the airflow webserver if we forward the port 8080:
 
 ``` [centos@k8s-master ~]$ kubectl port-forward airflow 8080 ```
 
-After setting up SSH tunneling to the PC we can access ```http://localhost:8080/admin/queryview/``` where it is possible to run ad-hoc queries on the database.
+8. After setting up SSH tunneling to the PC we can access ```http://localhost:8080/admin/queryview/``` where it is possible to run ad-hoc queries on the database.
+It is possible to upload the content of a .csv from the filesystem into the database via SQL. NOTE: we need to remove the password for user "root" in MYSQL for this to work temporarily.
+https://dev.mysql.com/doc/refman/5.6/en/load-data.html
 
+First we need to create the table and the columns:
+```
+CREATE TABLE stores (
+    storenr INT NOT NULL PRIMARY KEY,
+    close_date VARCHAR(255) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+	warehousenr INT NOT NULL
+);
+```
+This is getting created properly:
+
+![kép](https://user-images.githubusercontent.com/12872375/76699527-80d4e500-66ae-11ea-8f4b-786fa5e10c69.png)
+
+Then copy the stores.csv to the container with: 
+```
+[centos@k8s-master ~]$ kubectl cp stores.csv airflow:/tmp/
+Defaulting container name to webserver.
+```
+
+Trying to upload the data into MYSQL:
+
+```
+LOAD DATA LOCAL INFILE '/tmp/stores.csv'
+INTO TABLE stores
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(storenr,close_date,address,warehousenr)
+```
+
+Unfortunately Airflow errors here and no data gets uploaded:
+
+![kép](https://user-images.githubusercontent.com/12872375/76699670-1624a900-66b0-11ea-87fc-e2cf0710f99b.png)
+
+
+## Extending the project
+
+1. First and foremost there are no security considerations involved at any point in the above: 
+    - Using the kubernetes secret store is not recommended as passwords are only base64 encoded
+    - Passwords for airflow and root user in mysql/linux are defaults and/or unsafe
+    - No user/login is setup for airflow WEB UI (https://airflow.apache.org/docs/stable/security.html)
+    - SSL and HTTPS needs to be setup for Airflow
+    - Firewalls on the VMs are shutdown instead of opening only the required ports for the Kubernetes services (https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
+    - Kubernetes RBAC configurations are all defaults
+    
+2. Provisioning the infrastructure
+    - Setting up the k8s cluster be done in a public cloud with terraform and the kubernetes provider or using an already existing solution like https://coreos.com/tectonic/docs/latest/install/azure/azure-terraform.html
+    - Terraform also support vSphere API for creating VMs (not workstation though)
+    - Configurations on the OS level like IPv6 kernel parameters, swap settings, hostnames, kubernetes and docker repositories could be done with packer and this image would be used by terraform
+    - Installing and starting the services like docker and kubectl/kubeadm/kubelet should be done with a configuration management tool (chef/ansible/puppet/salt)
+    - Joining the nodes to the cluster via token, setting up the flannel network and labelling the nodes should be also done with configuration management
+    - Existing standard Helm charts could be used for MYSQL/Airflow/Redis/RabbitMQ (https://github.com/helm/charts/tree/master/stable/airflow)
+
+3. Airflow
+    - For a production landscape the CeleryExecutor should be used which requires additional services like RabbitMQ and Redis
+    - Creating a workflow and schedule (DAG?) to import the .csv files with a python program
+    - The pod needs to be put into a yaml file instead of being run with ```kubectl run airflow```
+    
+4. Monitoring and logging
+    - Log files from Airflow and MYSQL should be stored persistently in an external application like logstash
+    - Elasticsearch is capable of indexing metrics and logs fed to it from logstash
+    - Grafana or Kibana can be used to visualize data
+    - Alerting when kubernetes services go down (heartbeat)
+    
+## Additional comments
+1. Airflow has a pretty steep learning curve :)
+2. YAML is unforgiving
+3. It is very difficult to find any tutorials which go beyond the basics or are not already the complete solution
+4. Python knowledge is absolutely necessary going forward
